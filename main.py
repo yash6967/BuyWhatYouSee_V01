@@ -3,7 +3,7 @@ import torch
 import cv2
 import os
 import requests
-from serpapi import GoogleSearch
+# from serpapi import GoogleSearch
 from ultralytics import YOLO
 from PIL import Image
 import tempfile
@@ -52,14 +52,15 @@ def upload_to_imgur(image_path, client_id):
         return None
 
 def perform_google_lens_search(api_key, image_url):
+    """ Perform a Google Lens search using SerpApi """
     params = {
         "engine": "google_lens",
         "country": "in",
         "url": image_url,  # Image URL for the Google Lens search
         "api_key": api_key
     }
-    search = GoogleSearch(params)
-    results = search.get_dict()
+    response = requests.get("https://serpapi.com/search", params=params)
+    results = response.json()
 
     if "visual_matches" in results:
         return results["visual_matches"]
@@ -79,54 +80,65 @@ def main():
 
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 
-    if uploaded_file:
-        # Save the uploaded file to a temporary location
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp_file:
-            temp_file.write(uploaded_file.read())
-            image_path = temp_file.name
+    # Add a "Start" button to initiate the process
+    if st.button("Start"):
+        if uploaded_file:
+            # Save the uploaded file to a temporary location
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp_file:
+                temp_file.write(uploaded_file.read())
+                image_path = temp_file.name
 
-        # Load the image using OpenCV
-        image = cv2.imread(image_path)
-        if image is None:
-            st.error("Error loading the image. Please upload a valid image file.")
-            return
+            # Display the uploaded image
+            st.image(image_path, caption="Uploaded Image", use_column_width=True)
 
-        # Define output directory for cropped objects
-        output_dir = tempfile.mkdtemp()  # Create a temporary directory
+            # Load the image using OpenCV
+            image = cv2.imread(image_path)
+            if image is None:
+                st.error("Error loading the image. Please upload a valid image file.")
+                return
 
-        # Run object detection
-        detected_objects, _ = detect_objects_yolov5(image_path)
+            # Define output directory for cropped objects
+            output_dir = tempfile.mkdtemp()  # Create a temporary directory
 
-        if detected_objects:
-            st.write(f"Detected {len(detected_objects)} objects.")
-            for i, obj in enumerate(detected_objects):
-                bbox = obj["bbox"]
-                # Crop and save the object
-                cropped_image_path = crop_and_save_object(image, bbox, output_dir, i)
+            # Run object detection
+            detected_objects, _ = detect_objects_yolov5(image_path)
 
-                # Display cropped object
-                st.image(cropped_image_path, caption=f"Object {i + 1}", use_column_width=True)
+            if detected_objects:
+                st.write(f"Detected {len(detected_objects)} objects.")
+                for i, obj in enumerate(detected_objects):
+                    bbox = obj["bbox"]
+                    # Crop and save the object
+                    cropped_image_path = crop_and_save_object(image, bbox, output_dir, i)
 
-                # Upload cropped image to Imgur
-                st.write(f"Uploading Object {i + 1} to Imgur...")
-                image_url = upload_to_imgur(cropped_image_path, imgur_client_id)
+                    # Display cropped object
+                    st.image(cropped_image_path, caption=f"Object {i + 1}", use_column_width=True)
 
-                if image_url:
-                    st.write(f"Imgur Link: {image_url}")
-                    
-                    # Search using Google Lens API
-                    st.write(f"Searching for Object {i + 1}...")
-                    visual_matches = perform_google_lens_search(api_key, image_url)
+                    # Upload cropped image to Imgur
+                    st.write(f"Uploading Object {i + 1} to Imgur...")
+                    image_url = upload_to_imgur(cropped_image_path, imgur_client_id)
 
-                    if visual_matches:
-                        st.write(f"Results for Object {i + 1}:")
-                        for match in visual_matches:
-                            title = match.get("title", "No title")
-                            link = match.get("link", "No link")
-                            st.write(f"- **{title}**: [Link]({link})")
+                    if image_url:
+                        st.write(f"Imgur Link: {image_url}")
+                        
+                        # Search using Google Lens API
+                        st.write(f"Searching for Object {i + 1}...")
+                        visual_matches = perform_google_lens_search(api_key, image_url)
+
+                        if visual_matches:
+                            st.write(f"Results for Object {i + 1}:")
+                            for match in visual_matches:
+                                title = match.get("title", "No title")
+                                link = match.get("link", "No link")
+                                if "www.amazon" in link or "www.flipkart" in link:
+                                    with st.container():
+                                        st.markdown(f"**{title}**")
+                                        st.write(f"[Link]({link})")
+                                        if st.button("Buy", key=f"buy_{i}_{link}"):
+                                            pass  # Placeholder for future functionality
+            else:
+                st.warning("No objects detected in the image.")
         else:
-            st.warning("No objects detected in the image.")
-
+            st.warning("Please upload an image before clicking 'Start'.")
 
 if __name__ == "__main__":
     main()
