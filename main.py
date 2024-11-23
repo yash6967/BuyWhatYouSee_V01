@@ -1,18 +1,15 @@
 import streamlit as st
-import torch
 import cv2
 import os
 import requests
-# from serpapi import GoogleSearch
 from ultralytics import YOLO
-from PIL import Image
 import tempfile
+import torch
 
 def detect_objects_yolov5(image_path):
-    from ultralytics import YOLO
-    
     # Load YOLOv5 model
-    model = YOLO('yolov5s.pt')  # Ensure you have yolov5s.pt in the working directory or use a full path
+    # model = YOLO('yolov5su.pt')
+    model = torch.load('yolov5su.pt', map_location='cpu')
 
     # Perform inference
     results = model(image_path)
@@ -69,8 +66,8 @@ def perform_google_lens_search(api_key, image_url):
         return None
 
 def main():
-    st.title("Object Detection and Search App")
-    st.write("Upload an image, detect objects using YOLOv5, and search for similar items using Google Lens.")
+    st.title("Buy What You See")
+    st.write("Upload an image, detect objects using YOLOv5, and search for similar items.")
 
     # api_key = st.text_input("Enter your SerpApi API Key:", type="password")
     # imgur_client_id = st.text_input("Enter your Imgur Client ID:", type="password")
@@ -89,7 +86,7 @@ def main():
                 image_path = temp_file.name
 
             # Display the uploaded image
-            st.image(image_path, caption="Uploaded Image", use_column_width=True)
+            st.image(image_path, caption="Uploaded Image", use_container_width=True)
 
             # Load the image using OpenCV
             image = cv2.imread(image_path)
@@ -100,8 +97,10 @@ def main():
             # Define output directory for cropped objects
             output_dir = tempfile.mkdtemp()  # Create a temporary directory
 
-            # Run object detection
-            detected_objects, _ = detect_objects_yolov5(image_path)
+            # Show loading spinner
+            with st.spinner("Detecting objects..."):
+                # Run object detection
+                detected_objects, _ = detect_objects_yolov5(image_path)
 
             if detected_objects:
                 st.write(f"Detected {len(detected_objects)} objects.")
@@ -111,7 +110,7 @@ def main():
                     cropped_image_path = crop_and_save_object(image, bbox, output_dir, i)
 
                     # Display cropped object
-                    st.image(cropped_image_path, caption=f"Object {i + 1}", use_column_width=True)
+                    st.image(cropped_image_path, caption=f"Object {i + 1}", use_container_width=True)
 
                     # Upload cropped image to Imgur
                     st.write(f"Uploading Object {i + 1} to Imgur...")
@@ -122,19 +121,20 @@ def main():
                         
                         # Search using Google Lens API
                         st.write(f"Searching for Object {i + 1}...")
-                        visual_matches = perform_google_lens_search(api_key, image_url)
+                        with st.spinner("Searching for similar items..."):
+                            visual_matches = perform_google_lens_search(api_key, image_url)
 
                         if visual_matches:
                             st.write(f"Results for Object {i + 1}:")
-                            for match in visual_matches:
+                            for j, match in enumerate(visual_matches[:5]):  # Limit to first 5 results
                                 title = match.get("title", "No title")
                                 link = match.get("link", "No link")
                                 if "www.amazon" in link or "www.flipkart" in link:
                                     with st.container():
-                                        st.markdown(f"**{title}**")
-                                        st.write(f"[Link]({link})")
-                                        if st.button("Buy", key=f"buy_{i}_{link}"):
-                                            pass  # Placeholder for future functionality
+                                        st.markdown(f"**{j + 1}. {title}**")
+                                        st.write(f"[BUY]({link})")
+                                        # if st.button("Buy", key=f"buy_{i}_{link}") :
+                                        #     pass  # Placeholder for future functionality
             else:
                 st.warning("No objects detected in the image.")
         else:
