@@ -4,6 +4,13 @@ import os
 import tempfile
 import torch
 import requests
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
+from tkinter import Button, Tk
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 # YOLOv5 Object Detection
 def detect_objects_yolov5(image_path, model, conf_thresh=0.6, iou_thresh=0.3):
@@ -59,6 +66,96 @@ def process_video(video_path, model, frame_skip=30):
     cap.release()
     return frames
 
+def create_buy_button(link, obj_index):
+    if st.button("Buy Now", key=f"buy_button_{obj_index}"):
+        on_buy_button_click1(link)
+
+def on_buy_button_click(link):
+    # Initialize the Chrome driver
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
+    wait = WebDriverWait(driver, 30)  # Increase wait time to 30 seconds
+    
+    # Open the Amazon sign-in URL
+    driver.get("https://www.amazon.in/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.in%2F%3F%26tag%3Dgooghydrabk1-21%26ref%3Dnav_custrec_signin%26adgrpid%3D155259813593%26hvpone%3D%26hvptwo%3D%26hvadid%3D713930225169%26hvpos%3D%26hvnetw%3Dg%26hvrand%3D12812917607770335993%26hvqmt%3De%26hvdev%3Dc%26hvdvcmdl%3D%26hvlocint%3D%26hvlocphy%3D1007805%26hvtargid%3Dkwd-64107830%26hydadcr%3D14452_2402225%26gad_source%3D1&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=inflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0")
+    
+    # Locate the email input field and enter email
+    email_field = wait.until(EC.element_to_be_clickable((By.ID, 'ap_email')))
+    email_field.send_keys('ysharmaa09@gmail.com')
+    driver.find_element(By.ID, 'continue').click()
+    
+    # Wait for the password field to be located and enter password
+    password_field = wait.until(EC.element_to_be_clickable((By.ID, 'ap_password')))
+    password_field.send_keys('G yash G')
+    driver.find_element(By.ID, 'signInSubmit').click()
+    
+    # Navigate to the product page
+    driver.implicitly_wait(2)
+    driver.get(link)
+    add_to_cart_button = wait.until(EC.element_to_be_clickable((By.ID, 'add-to-cart-button')))
+    add_to_cart_button.click()
+    
+    # Proceed to checkout
+    driver.implicitly_wait(2)
+    driver.get('https://www.amazon.in/gp/aw/c?ref_=navm_hdr_cart')
+    proceed_to_checkout_button = wait.until(EC.element_to_be_clickable((By.NAME, 'proceedToRetailCheckout')))
+    proceed_to_checkout_button.click()
+    
+    # Wait for a while to simulate order placement
+    driver.implicitly_wait(30)
+    print("Order placed successfully!")
+
+def on_buy_button_click1(link):
+    # Initialize the Chrome driver
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
+    wait = WebDriverWait(driver, 20)  # Increased wait time to 30 seconds
+    
+    try:
+        # Open the Amazon sign-in URL
+        driver.get("https://www.amazon.in/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.in%2F%3F%26tag%3Dgooghydrabk1-21%26ref%3Dnav_custrec_signin%26adgrpid%3D155259813593%26hvpone%3D%26hvptwo%3D%26hvadid%3D713930225169%26hvpos%3D%26hvnetw%3Dg%26hvrand%3D12812917607770335993%26hvqmt%3De%26hvdev%3Dc%26hvdvcmdl%3D%26hvlocint%3D%26hvlocphy%3D1007805%26hvtargid%3Dkwd-64107830%26hydadcr%3D14452_2402225%26gad_source%3D1&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=inflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0")  # truncated for readability
+        
+        # Locate the email input field and enter email
+        email_field = wait.until(EC.visibility_of_element_located((By.ID, 'ap_email')))
+        email_field.send_keys('ysharmaa09@gmail.com')
+        driver.find_element(By.ID, 'continue').click()
+        
+        # Locate and enter password
+        password_field = wait.until(EC.visibility_of_element_located((By.ID, 'ap_password')))
+        password_field.send_keys('G yash G')
+        driver.find_element(By.ID, 'signInSubmit').click()
+        
+        # Navigate to the product page
+        driver.implicitly_wait(5)
+        driver.get(link)
+        # add_to_cart_button = wait.until(EC.element_to_be_clickable((By.ID, 'add-to-cart-button')))
+        # add_to_cart_button.click()
+        
+        # Proceed to checkout
+        # driver.implicitly_wait(5)
+
+        # Navigate to the product page
+        # driver.get(link)
+
+        # Locate and click the "Buy Now" button
+        driver.implicitly_wait(5)
+        buy_now_button = wait.until(EC.element_to_be_clickable((By.ID, 'buy-now-button')))
+        buy_now_button.click()
+
+        # Proceed with the checkout process after clicking "Buy Now"
+        proceed_to_checkout_button = wait.until(EC.element_to_be_clickable((By.NAME, 'proceedToRetailCheckout')))
+        proceed_to_checkout_button.click()
+
+        
+        print("Order placed successfully!")
+        
+    except Exception as e:
+        print("An error occurred:", e)
+    
+    finally:
+        # Close the driver
+        driver.quit()
+        
+        
+        
 # Main Streamlit application
 def main():
     st.title("Object Detection in Videos")
@@ -134,7 +231,8 @@ def main():
                             if "www.amazon" in link or "www.flipkart" in link:
                                 with st.container():
                                     st.markdown(f"**{title}**")
-                                    st.write(f"[BUY]({link})")
+                                    # st.write(f"[BUY]({link})")
+                                    create_buy_button(link, link)
                             st.write(f"[{match.get('title', 'No title')}]({match.get('link')})")
                     else:
                         st.error("No visual matches found.")
