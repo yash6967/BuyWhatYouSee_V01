@@ -40,7 +40,10 @@ def upload_to_imgur(image_path, client_id):
     headers = {'Authorization': f'Client-ID {client_id}'}
     with open(image_path, 'rb') as img:
         response = requests.post("https://api.imgur.com/3/image", headers=headers, files={"image": img})
-    data = response.json()
+    try:
+        data = response.json()
+    except ValueError:
+        return None
     if response.status_code == 200 and data["success"]:
         return data["data"]["link"]
     else:
