@@ -109,7 +109,7 @@ def on_buy_button_click(link):
 def on_buy_button_click1(link):
     # Initialize the Chrome driver
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
-    wait = WebDriverWait(driver, 20)  # Increased wait time to 30 seconds
+    wait = WebDriverWait(driver, 10)  # Increased wait time to 30 seconds
     
     try:
         # Open the Amazon sign-in URL
@@ -139,7 +139,7 @@ def on_buy_button_click1(link):
 
         # Locate and click the "Buy Now" button
         driver.implicitly_wait(5)
-        buy_now_button = wait.until(EC.element_to_be_clickable((By.ID, 'buy-now-button')))
+        buy_now_button = wait.until(EC.visibility_of_element_located((By.ID, 'buy-now-button')))
         buy_now_button.click()
 
         # Proceed with the checkout process after clicking "Buy Now"
@@ -160,6 +160,7 @@ def on_buy_button_click1(link):
         
 # Main Streamlit application
 def main():
+    on_buy_button_click1("https://www.amazon.in/HP-i5-12450H-15-6-inch-Response-fa0666TX/dp/B0C2HZYM87/ref=asc_df_B0C2HZYM87/?tag=googleshopdes-21&linkCode=df0&hvadid=709855510254&hvpos=&hvnetw=g&hvrand=10730065153382135639&hvpone=&hvptwo=&hvqmt=&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9302182&hvtargid=pla-2195257768521&mcid=e7e7f93727bb3c91b358dfe3638d06bc&gad_source=1&th=1")
     st.title("Object Detection in Videos")
     st.write("Upload a video to detect objects and search for items using Google Lens.")
 
@@ -167,8 +168,8 @@ def main():
     # imgur_client_id = st.text_input("Imgur Client ID:", type="password")
     # api_key = st.text_input("SerpApi API Key:", type="password")
 
-    api_key = "d391abaa4565995bf471c54bb1644750e3f874ae0c8f59a48dfb9ae7e590cc7e"
-    imgur_client_id = "2f2e44e79e1f7fb"
+    api_key = "fa4b3d7d70f93667433616603f5af89dd1de7e0fbe9b4dd29aa91da23ea79d5b"
+    imgur_client_id = "0048ab11986a9d1"
 
     uploaded_file = st.file_uploader("Upload a video", type=["mp4", "avi", "mov", "mkv"])
     if uploaded_file:
@@ -224,6 +225,7 @@ def main():
 
                     response = requests.get("https://serpapi.com/search", params=params)
                     results = response.json()
+                    # st.write("Google Lens response:", results)  # Log the response for debugging
 
                     if "visual_matches" in results:
                         st.write(f"Results for Object {obj_index + 1}:")
@@ -233,7 +235,6 @@ def main():
                             if "www.amazon" in link or "www.flipkart" in link:
                                 with st.container():
                                     st.markdown(f"**{title}**")
-                                    # st.write(f"[BUY]({link})")
                                     create_buy_button(link, link)
                             st.write(f"[{match.get('title', 'No title')}]({match.get('link')})")
                     else:
