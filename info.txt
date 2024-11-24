@@ -1,2 +1,2 @@
     api_key = "d391abaa4565995bf471c54bb1644750e3f874ae0c8f59a48dfb9ae7e590cc7e"
-    imgur_client_id = "2f2e44e79e1f7fb"
+    imgur_client_id = "0048ab11986a9d1"
