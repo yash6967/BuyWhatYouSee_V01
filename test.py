@@ -160,7 +160,7 @@ def on_buy_button_click1(link):
         
 # Main Streamlit application
 def main():
-    on_buy_button_click1("https://www.amazon.in/HP-i5-12450H-15-6-inch-Response-fa0666TX/dp/B0C2HZYM87/ref=asc_df_B0C2HZYM87/?tag=googleshopdes-21&linkCode=df0&hvadid=709855510254&hvpos=&hvnetw=g&hvrand=10730065153382135639&hvpone=&hvptwo=&hvqmt=&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9302182&hvtargid=pla-2195257768521&mcid=e7e7f93727bb3c91b358dfe3638d06bc&gad_source=1&th=1")
+    # on_buy_button_click1("https://www.amazon.in/HP-i5-12450H-15-6-inch-Response-fa0666TX/dp/B0C2HZYM87/ref=asc_df_B0C2HZYM87/?tag=googleshopdes-21&linkCode=df0&hvadid=709855510254&hvpos=&hvnetw=g&hvrand=10730065153382135639&hvpone=&hvptwo=&hvqmt=&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9302182&hvtargid=pla-2195257768521&mcid=e7e7f93727bb3c91b358dfe3638d06bc&gad_source=1&th=1")
     st.title("Object Detection in Videos")
     st.write("Upload a video to detect objects and search for items using Google Lens.")
 
