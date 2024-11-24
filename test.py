@@ -168,8 +168,6 @@ def main():
     # imgur_client_id = st.text_input("Imgur Client ID:", type="password")
     # api_key = st.text_input("SerpApi API Key:", type="password")
 
-    api_key = "fa4b3d7d70f93667433616603f5af89dd1de7e0fbe9b4dd29aa91da23ea79d5b"
-    imgur_client_id = "2f2e44e79e1f7fb"
 
     uploaded_file = st.file_uploader("Upload a video", type=["mp4", "avi", "mov", "mkv"])
     if uploaded_file:
